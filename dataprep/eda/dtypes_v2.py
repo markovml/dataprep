@@ -218,9 +218,11 @@ def _is_numeric_string(series: dd.Series, threshold=0.90):
         txt = text.strip() if isinstance(text, str) else str(text).strip()
         try:
             float(txt)
-            return True
+            out = True
         except ValueError:
-            return False
+            out = False
+        ftfy = (1, 0) if out else (0, 1)  # (yes_count, no_count)
+        return ftfy
 
     result = series.apply(_check_is_str_float)
     yes, no = zip(*result) if result is not None else ([0], [0])
