@@ -76,15 +76,15 @@ class Numerical(DType):
     """
 
 
-class NumericString(Numerical):
-    """
-
-    """
-
-
 class Continuous(Numerical):
     """
     Type Continuous, Subtype of Numerical
+    """
+
+
+class NumericString(Continuous):
+    """
+
     """
 
 
@@ -237,8 +237,19 @@ def detect_without_known(col: Union[dd.Series, pd.Series], head: pd.Series) -> D
     """
     This function detects dtypes of column when users didn't specify.
     """
+
     if _is_numeric_string(head):
-        return NumericString()
+        # detect as categorical if distinct value is small
+        if isinstance(col, dd.Series):
+            nuniques = col.nunique_approx().compute()
+        elif isinstance(col, pd.Series):
+            nuniques = col.nunique()
+        else:
+            raise TypeError(f"unprocessed column type:{type(col)}")
+        if nuniques < 10:
+            return SmallCardNum()
+        else:
+            return NumericString()
     if is_continuous(col.dtype):
         # detect as categorical if distinct value is small
         if isinstance(col, dd.Series):

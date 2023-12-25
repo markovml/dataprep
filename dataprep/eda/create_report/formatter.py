@@ -32,7 +32,7 @@ from ..dtypes_v2 import (
     Nominal,
     GeoGraphy,
     GeoPoint,
-    SmallCardNum,
+    NumericString, SmallCardNum,
 )
 from ..eda_frame import EDAFrame
 from ..intermediate import Intermediate
@@ -317,6 +317,8 @@ def _compute_variables(df: EDAFrame, cfg: Config) -> Dict[str, Any]:
                     srs = df.get_col_as_str(col, na_as_str=False)
                     data[col] = nom_comps(srs, cfg)
                 elif isinstance(dtype, Continuous):
+                    data[col] = cont_comps(df.frame[col], cfg)
+                elif isinstance(dtype, NumericString):
                     data[col] = cont_comps(df.frame[col], cfg)
                 elif isinstance(dtype, DateTime):
                     data[col] = {}
