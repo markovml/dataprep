@@ -76,6 +76,12 @@ class Numerical(DType):
     """
 
 
+class NumericString(Numerical):
+    """
+
+    """
+
+
 class Continuous(Numerical):
     """
     Type Continuous, Subtype of Numerical
@@ -139,9 +145,9 @@ DTypeDef = Union[Dict[str, Union[DType, Type[DType], str]], DType, Type[DType], 
 
 
 def detect_dtype(
-    col: Union[dd.Series, pd.Series],
-    head: pd.Series,
-    known_dtype: Optional[DTypeDef] = None,
+        col: Union[dd.Series, pd.Series],
+        head: pd.Series,
+        known_dtype: Optional[DTypeDef] = None,
 ) -> DType:
     """
     Given a column, detect its type or transform its type according to users' specification
@@ -181,19 +187,47 @@ def map_dtype(dtype: DType) -> DType:
     We will map Categorical() to Nominal() and Numerical() to Continuous()
     """
     if (
-        isinstance(dtype, Categorical) is True
-        and isinstance(dtype, Ordinal) is False
-        and isinstance(dtype, Nominal) is False
+            isinstance(dtype, Categorical) is True
+            and isinstance(dtype, Ordinal) is False
+            and isinstance(dtype, Nominal) is False
     ):
         return Nominal()
     elif (
-        isinstance(dtype, Numerical) is True
-        and isinstance(dtype, Continuous) is False
-        and isinstance(dtype, Discrete) is False
+            isinstance(dtype, Numerical) is True
+            and isinstance(dtype, Continuous) is False
+            and isinstance(dtype, Discrete) is False
     ):
         return Continuous()
     else:
         return dtype
+
+
+def _is_numeric_string(series: dd.Series, threshold=0.90):
+    """
+    True if the input is a numeric string like '1.2345', '1.566'
+    Parameters
+    ----------
+    series :
+
+    Returns
+    -------
+
+    """
+
+    def _check_is_str_float(text: str):
+        txt = text.strip() if isinstance(text, str) else str(text).strip()
+        try:
+            float(txt)
+            return True
+        except ValueError:
+            return False
+
+    result = series.apply(_check_is_str_float)
+    yes, no = zip(*result) if result is not None else ([0], [0])
+    f_out = (
+        True if ((yes or no) and sum(yes) / (sum(yes) + sum(no)) > threshold) else False
+    )
+    return f_out
 
 
 def detect_without_known(col: Union[dd.Series, pd.Series], head: pd.Series) -> DType:
@@ -201,7 +235,8 @@ def detect_without_known(col: Union[dd.Series, pd.Series], head: pd.Series) -> D
     """
     This function detects dtypes of column when users didn't specify.
     """
-
+    if _is_numeric_string(head):
+        return NumericString()
     if is_continuous(col.dtype):
         # detect as categorical if distinct value is small
         if isinstance(col, dd.Series):
@@ -335,7 +370,7 @@ def string_dtype_to_object(df: dd.DataFrame) -> dd.DataFrame:
 
 
 def drop_null(
-    var: Union[dd.Series, pd.DataFrame, dd.DataFrame]
+        var: Union[dd.Series, pd.DataFrame, dd.DataFrame]
 ) -> Union[pd.Series, dd.Series, pd.DataFrame, dd.DataFrame]:
     """
     Drop the null values (specified in NULL_VALUES) from a series or DataFrame

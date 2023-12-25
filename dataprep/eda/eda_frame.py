@@ -16,7 +16,7 @@ from .dtypes_v2 import (
     NUMERICAL_DTYPES,
     DType,
     DTypeDef,
-    detect_dtype,
+    NumericString, detect_dtype,
     Nominal,
     GeoGraphy,
 )
@@ -53,10 +53,10 @@ class EDAFrame:
     # pylint: disable = too-many-statements
     # pylint: disable = too-many-instance-attributes
     def __init__(
-        self,
-        df: Optional[DataFrame] = None,
-        dtype: Optional[DTypeDef] = None,
-        repartition: bool = True,
+            self,
+            df: Optional[DataFrame] = None,
+            dtype: Optional[DTypeDef] = None,
+            repartition: bool = True,
     ) -> None:
 
         _suppress_warnings()
@@ -119,7 +119,8 @@ class EDAFrame:
         for col in ddf.columns:
             if isinstance(self._eda_dtypes[col], (Nominal, GeoGraphy)):
                 ddf[col] = ddf[col].apply(_to_str_if_not_na, meta=(col, "object"))
-
+            if isinstance(self._eda_dtypes[col], NumericString):
+                ddf[col] = ddf[col].apply(_to_numeric_type, meta=(col, np.float32))
             # transform pandas extension type to the numpy type,
             # to avoid computation issue of pandas type, e.g., #733.
             elif issubclass(type(ddf[col].dtype), pd.api.extensions.ExtensionDtype):
@@ -200,7 +201,7 @@ class EDAFrame:
 
         # The case for directly return
         if (isinstance(self._eda_dtypes[col], (Nominal, GeoGraphy))) and (
-            (na_as_str and self.get_missing_cnt(col) == 0) or (not na_as_str)
+                (na_as_str and self.get_missing_cnt(col) == 0) or (not na_as_str)
         ):
             return self._ddf[col]
 
@@ -297,6 +298,13 @@ def _process_column_name(df_columns: pd.Index) -> List[str]:
             new_col_name = f"{col}"
         columns[i] = new_col_name
     return columns
+
+
+def _to_numeric_type(text: str):
+    try:
+        return text if libmissing.checknull(text) else float(text)
+    except ValueError:
+        return None
 
 
 def _to_str_if_not_na(obj: Any) -> Any:
