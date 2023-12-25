@@ -120,7 +120,7 @@ class EDAFrame:
             if isinstance(self._eda_dtypes[col], (Nominal, GeoGraphy)):
                 ddf[col] = ddf[col].apply(_to_str_if_not_na, meta=(col, "object"))
             if isinstance(self._eda_dtypes[col], NumericString):
-                ddf[col] = ddf[col].apply(_to_numeric_type, meta=(col, np.float32))
+                ddf[col] = ddf[col].apply(_to_numeric_type, meta=(col, np.float))
             # transform pandas extension type to the numpy type,
             # to avoid computation issue of pandas type, e.g., #733.
             elif issubclass(type(ddf[col].dtype), pd.api.extensions.ExtensionDtype):
@@ -322,7 +322,7 @@ def _detect_dtypes(df: dd.DataFrame, known_dtype: Optional[DTypeDef] = None) -> 
     Return a dict that maps column name to its dtype for each column in given df.
     """
     df = df.persist()
-    head = df.head(n=100)
+    head = df.head(n=1000)
     res = {}
     for col in df.columns:
         dtype = detect_dtype(df[col], head[col], known_dtype)
