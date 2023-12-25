@@ -318,8 +318,6 @@ def _compute_variables(df: EDAFrame, cfg: Config) -> Dict[str, Any]:
                     data[col] = nom_comps(srs, cfg)
                 elif isinstance(dtype, Continuous):
                     data[col] = cont_comps(df.frame[col], cfg)
-                elif isinstance(dtype, NumericString):
-                    data[col] = cont_comps(df.frame[col], cfg)
                 elif isinstance(dtype, DateTime):
                     data[col] = {}
                     data[col]["stats"] = calc_stats_dt(df.frame[col])
