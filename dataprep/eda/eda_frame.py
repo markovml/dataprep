@@ -120,7 +120,7 @@ class EDAFrame:
             if isinstance(self._eda_dtypes[col], (Nominal, GeoGraphy)):
                 ddf[col] = ddf[col].apply(_to_str_if_not_na, meta=(col, "object"))
             elif isinstance(self._eda_dtypes[col], NumericString):
-                ddf[col] = ddf[col].astype(np.float).fillna(0.0)
+                ddf[col] = ddf[col].astype(np.float32).fillna(0.0)
             # transform pandas extension type to the numpy type,
             # to avoid computation issue of pandas type, e.g., #733.
             elif issubclass(type(ddf[col].dtype), pd.api.extensions.ExtensionDtype):
