@@ -223,8 +223,9 @@ def _is_numeric_string(series: dd.Series, threshold=0.90):
             out = False
         ftfy = (1, 0) if out else (0, 1)  # (yes_count, no_count)
         return ftfy
-    series.fillna('')
-    result = series.apply(_check_is_str_float)
+
+    s_df = series.fillna('')
+    result = s_df.apply(_check_is_str_float)
     yes, no = zip(*result) if result is not None else ([0], [0])
     f_out = (
         True if ((yes or no) and sum(yes) / (sum(yes) + sum(no)) > threshold) else False
