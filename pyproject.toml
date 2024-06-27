@@ -64,7 +64,7 @@ flask = "^2"
 flask_cors = "^3.0.10"
 metaphone = "^0.6"
 python-stdnum = "^1.16"
-regex = "^2021.8.3"
+regex = "^2022.0.0"
 varname = "^0.8.1"
 python-crfsuite = "0.9.8"
 rapidfuzz = "^2.1.2"
@@ -88,7 +88,7 @@ sphinx = "^4"
 sphinx-autobuild = "^2021"
 sphinx-autodoc-typehints = "^1"
 toml = "^0.10"
-ray = "^1.13.0"
+ray = "^2.13.0"
 
 [tool.black]
 exclude = '''
